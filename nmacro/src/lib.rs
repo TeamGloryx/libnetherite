@@ -100,10 +100,10 @@ pub fn org_mod(what: TS) -> TS {
     };
 
     quote! {
-        #![allow(non_snake_case)]
-
+        #[allow(non_snake_case)]
         #kwstruct
 
+        #[allow(non_snake_case)]
         pub const KEYWORDS: Keywords = #kws;
 
         pub const ORG_DATA: &'static str = #what;
