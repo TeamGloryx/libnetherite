@@ -57,7 +57,7 @@ pub fn org_mod(what: TS) -> TS {
         pub fn render(cx: Scope) -> Element {
             cx.render(rsx! {
                 div {
-                    dangerous_inner_html: ORG_DATA
+                    dangerous_inner_html: HTML_DATA
                 }
             })
         }
