@@ -4,7 +4,7 @@ use self::spacing::Spacing;
 
 pub mod spacing;
 
-#[derive(derive_more::Display, Copy, Clone, Debug, Default)]
+#[derive(derive_more::Display, Copy, Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Display {
     #[default]
     Block,
@@ -16,7 +16,7 @@ pub enum Display {
     InlineFlex,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Padding {
     pub left: Option<Spacing>,
     pub right: Option<Spacing>,
@@ -67,7 +67,7 @@ impl Padding {
     }
 }
 
-#[derive(Debug, Clone, Default, Props)]
+#[derive(Debug, Clone, Default, Props, PartialEq)]
 pub struct TwProps {
     pub display: Option<Display>,
     pub padding: Option<Padding>,
