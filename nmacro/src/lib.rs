@@ -1,3 +1,4 @@
+#![feature(proc_macro_expand)]
 use proc_macro::TokenStream as TS;
 use proc_macro2::{Literal, TokenStream};
 use quote::quote;
@@ -40,6 +41,7 @@ pub fn im_spacing(b: TS) -> TS {
 
 #[proc_macro]
 pub fn org_mod(what: TS) -> TS {
+    let what = what.expand_expr().unwrap();
     let what = parse_macro_input!(what as LitStr).value();
     let org = orgize::Org::parse(&what);
     let mut html = Vec::new();
