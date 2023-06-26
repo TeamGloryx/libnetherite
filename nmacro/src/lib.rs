@@ -165,7 +165,7 @@ pub fn ranks(input: TS) -> TS {
                 ),
             )
         })
-        .map(|(rank, kws)| quote!(Self::#rank => Self::#kws,));
+        .map(|(rank, kws)| quote!(Self::#rank => #kws,));
 
     quote! {
         #[derive(Copy, Clone, Debug)]
@@ -173,9 +173,9 @@ pub fn ranks(input: TS) -> TS {
             #(#rks)*
         }
 
-        impl Rank {
-            #(#rkws)*
+        #(#rkws)*
 
+        impl Rank {
             #[doc(hidden)]
             pub fn _keywords(&self) -> &'static RankKeywords {
                 match {
