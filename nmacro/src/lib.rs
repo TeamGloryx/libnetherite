@@ -192,7 +192,7 @@ pub fn ranks(input: TS) -> TS {
         impl Rank {
             pub const VALUES: [Self; #count] = [#(#values),*];
 
-            pub fn render(&self, cx: dioxus::prelude::Scope) -> dioxus::prelude::Element {
+            pub fn render<'a>(&self, cx: dioxus::prelude::Scope<'a>) -> dioxus::prelude::Element<'a> {
                 match self {
                     #(#render_match)*
                 }
