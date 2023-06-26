@@ -166,6 +166,15 @@ pub fn ranks(input: TS) -> TS {
             )
         })
         .map(|(rank, kws)| quote!(Self::#rank => &#kws,));
+    let render_match = input
+        .iter()
+        .map(|rank| {
+            (
+                rank,
+                Ident::new(&rank.to_string().to_pascal_case(), Span::call_site()),
+            )
+        })
+        .map(|(rank, var)| quote!(Self::#var => #rank::render(cx)));
 
     quote! {
         #[derive(Copy, Clone, Debug)]
@@ -176,6 +185,12 @@ pub fn ranks(input: TS) -> TS {
         #(#rkws)*
 
         impl Rank {
+            pub fn render(&self, cx: dioxus::prelude::Scope) -> dioxus::prelude::Element {
+                match self {
+                    #(#render_match)*
+                }
+            }
+
             #[doc(hidden)]
             pub fn _keywords(&self) -> &'static RankKeywords {
                 match self {
