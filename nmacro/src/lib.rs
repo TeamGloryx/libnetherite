@@ -165,7 +165,7 @@ pub fn ranks(input: TS) -> TS {
                 ),
             )
         })
-        .map(|(rank, kws)| quote!(Self::#rank => #kws,));
+        .map(|(rank, kws)| quote!(Self::#rank => &#kws,));
 
     quote! {
         #[derive(Copy, Clone, Debug)]
