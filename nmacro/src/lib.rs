@@ -85,7 +85,7 @@ pub fn org_mod(what: TS) -> TS {
                 mutability: syn::FieldMutability::None,
                 ty: syn::Type::Reference(TypeReference {
                     and_token: Default::default(),
-                    lifetime: Some(Lifetime::new("static", Span::call_site())),
+                    lifetime: Some(Lifetime::new("'static", Span::call_site())),
                     elem: Box::new(Parser::parse2(syn::Type::parse, st.clone()).unwrap()),
                     mutability: None,
                 }),
