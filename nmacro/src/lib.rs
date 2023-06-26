@@ -1,8 +1,14 @@
 #![feature(proc_macro_expand)]
 use proc_macro::TokenStream as TS;
-use proc_macro2::{Literal, TokenStream};
+use proc_macro2::{Ident, Literal, Span, TokenStream};
 use quote::quote;
-use syn::{parse_macro_input, LitStr};
+use syn::{
+    parse::{Parse, Parser},
+    parse_macro_input,
+    punctuated::Punctuated,
+    ExprStruct, Field, Fields, FieldsNamed, Generics, ItemStruct, Lifetime, LitStr, Path, TypePath,
+    TypeReference,
+};
 
 fn literate(num: f32) -> Literal {
     if num.fract() == 0.0 {
@@ -49,10 +55,55 @@ pub fn org_mod(what: TS) -> TS {
     let html = String::from_utf8(html).unwrap();
     let html_lit = Literal::string(&html);
     let keywords = org.keywords().collect::<Vec<_>>();
+    let st = quote!(str);
 
-    println!("{:#?}", keywords);
+    println!("keywords = {:#?}", keywords);
+    let kwws = keywords
+        .iter()
+        .map(|kw| {
+            let name = Ident::new(&kw.key, Span::call_site());
+            let value = LitStr::new(&kw.value, Span::call_site());
+
+            quote!(#name: #value,)
+        })
+        .collect::<Vec<_>>();
+
+    let kws = quote! {
+        Keywords {
+            #(#kwws)*
+        }
+    };
+
+    let kwstruct = ItemStruct {
+        fields: Fields::Named(FieldsNamed {
+            brace_token: Default::default(),
+            named: Punctuated::from_iter(keywords.into_iter().map(|kw| Field {
+                attrs: vec![],
+                colon_token: Some(Default::default()),
+                vis: syn::Visibility::Public(Default::default()),
+                ident: Some(Ident::new(&kw.key, Span::call_site())),
+                mutability: syn::FieldMutability::None,
+                ty: syn::Type::Reference(TypeReference {
+                    and_token: Default::default(),
+                    lifetime: Some(Lifetime::new("static", Span::call_site())),
+                    elem: Box::new(Parser::parse2(syn::Type::parse, st.clone()).unwrap()),
+                    mutability: None,
+                }),
+            })),
+        }),
+        attrs: vec![],
+        generics: Generics::default(),
+        ident: Ident::new("Keywords", Span::call_site()),
+        semi_token: None,
+        struct_token: Default::default(),
+        vis: syn::Visibility::Public(Default::default()),
+    };
 
     quote! {
+        #kwstruct
+
+        pub const KEYWORDS: Keywords = #kws;
+
         pub const ORG_DATA: &'static str = #what;
         pub const HTML_DATA: &'static str = #html_lit;
         use dioxus::prelude::*;
