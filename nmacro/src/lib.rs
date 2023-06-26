@@ -48,6 +48,9 @@ pub fn org_mod(what: TS) -> TS {
     org.write_html(&mut html).unwrap();
     let html = String::from_utf8(html).unwrap();
     let html_lit = Literal::string(&html);
+    let keywords = org.keywords().collect::<Vec<_>>();
+
+    println!("{:#?}", keywords);
 
     quote! {
         pub const ORG_DATA: &'static str = #what;
