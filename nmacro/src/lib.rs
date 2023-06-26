@@ -48,10 +48,12 @@ pub fn org_mod(what: TS) -> TS {
     let html_lit = Literal::string(&html);
 
     quote! {
-        pub const ORG_DATA: &'static str = #html_lit;
+        pub const ORG_DATA: &'static str = #what;
+        pub const HTML_DATA: &'static str = #html_lit;
+        use dioxus::prelude::*;
 
-        pub fn render(cx: dioxus::prelude::Scope) -> dioxus::prelude::Element {
-            cx.render(dioxus::prelude::rsx! {
+        pub fn render(cx: Scope) -> Element {
+            cx.render(rsx! {
                 div {
                     dangerous_inner_html: ORG_DATA
                 }
