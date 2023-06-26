@@ -100,6 +100,8 @@ pub fn org_mod(what: TS) -> TS {
     };
 
     quote! {
+        #![allow(non_snake_case)]
+
         #kwstruct
 
         pub const KEYWORDS: Keywords = #kws;
