@@ -1,6 +1,7 @@
 use proc_macro::TokenStream as TS;
 use proc_macro2::{Literal, TokenStream};
 use quote::quote;
+use syn::{parse_macro_input, LitStr};
 
 fn literate(num: f32) -> Literal {
     if num.fract() == 0.0 {
@@ -32,6 +33,29 @@ pub fn im_spacing(b: TS) -> TS {
             [rem($n:literal)] => ( crate::ui::spacing::Spacing::Rem($n) ),
             [em($n:literal)] => ( crate::ui::spacing::Spacing::Em($n) ),
             [px($n:literal)] => ( crate::ui::spacing::Spacing::Px($n) )
+        }
+    }
+    .into()
+}
+
+#[proc_macro]
+pub fn org_mod(what: TS) -> TS {
+    let what = parse_macro_input!(what as LitStr).value();
+    let org = orgize::Org::parse(&what);
+    let mut html = Vec::new();
+    org.write_html(&mut html).unwrap();
+    let html = String::from_utf8(html).unwrap();
+    let html_lit = Literal::string(&html);
+
+    quote! {
+        pub const ORG_DATA: &'static str = #html_lit;
+
+        pub fn render(cx: dioxus::prelude::Scope) -> dioxus::prelude::Element {
+            cx.render(dioxus::prelude::rsx! {
+                div {
+                    dangerous_inner_html: ORG_DATA
+                }
+            })
         }
     }
     .into()
