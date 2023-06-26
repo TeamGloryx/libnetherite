@@ -91,9 +91,9 @@ pub fn org_mod(what: TS) -> TS {
                     ident: Some(Ident::new(&kw.key, Span::call_site())),
                     mutability: syn::FieldMutability::None,
                     ty: if kw.value.parse::<u32>().is_ok() {
-                        Parser::parse2(syn::Type::parse, u3)
+                        Parser::parse2(syn::Type::parse, u3.clone())
                     } else {
-                        Parser::parse2(syn::Type::parse, st)
+                        Parser::parse2(syn::Type::parse, st.clone())
                     }
                     .unwrap(),
                 }
