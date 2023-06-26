@@ -151,7 +151,7 @@ pub fn ranks(input: TS) -> TS {
                 static #kws: RankKeywords = RankKeywords {
                     name: #rank::KEYWORDS.title,
                     price: #rank::KEYWORDS.price
-                }
+                };
             }
         });
     let rkws_match = input
