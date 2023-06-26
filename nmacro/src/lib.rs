@@ -178,7 +178,7 @@ pub fn ranks(input: TS) -> TS {
         impl Rank {
             #[doc(hidden)]
             pub fn _keywords(&self) -> &'static RankKeywords {
-                match {
+                match self {
                     #(#rkws_match)*
                 }
             }
