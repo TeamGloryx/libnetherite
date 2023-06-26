@@ -175,6 +175,11 @@ pub fn ranks(input: TS) -> TS {
             )
         })
         .map(|(rank, var)| quote!(Self::#var => #rank::render(cx)));
+    let count = input.len();
+    let values = input
+        .iter()
+        .map(|rank| Ident::new(&rank.to_string().to_pascal_case(), Span::call_site()))
+        .map(|rank| quote!(Self::#rank));
 
     quote! {
         #[derive(Copy, Clone, Debug)]
@@ -185,6 +190,8 @@ pub fn ranks(input: TS) -> TS {
         #(#rkws)*
 
         impl Rank {
+            pub const VALUES: [Self; #count] = [#(#values),*];
+
             pub fn render(&self, cx: dioxus::prelude::Scope) -> dioxus::prelude::Element {
                 match self {
                     #(#render_match)*
