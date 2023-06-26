@@ -1,4 +1,5 @@
 #![feature(proc_macro_expand)]
+use inflector::Inflector;
 use proc_macro::TokenStream as TS;
 use proc_macro2::{Ident, Literal, Span, TokenStream};
 use quote::quote;
@@ -6,8 +7,8 @@ use syn::{
     parse::{Parse, Parser},
     parse_macro_input,
     punctuated::Punctuated,
-    ExprStruct, Field, Fields, FieldsNamed, Generics, ItemStruct, Lifetime, LitStr, Path, TypePath,
-    TypeReference,
+    ExprStruct, Field, Fields, FieldsNamed, Generics, ItemStruct, Lifetime, LitStr, Path, Token,
+    TypePath, TypeReference,
 };
 
 fn literate(num: f32) -> Literal {
@@ -55,16 +56,21 @@ pub fn org_mod(what: TS) -> TS {
     let html = String::from_utf8(html).unwrap();
     let html_lit = Literal::string(&html);
     let keywords = org.keywords().collect::<Vec<_>>();
-    let st = quote!(str);
+    let st = quote!(&'static str);
+    let u3 = quote!(u32);
 
     println!("keywords = {:#?}", keywords);
     let kwws = keywords
         .iter()
         .map(|kw| {
             let name = Ident::new(&kw.key, Span::call_site());
-            let value = LitStr::new(&kw.value, Span::call_site());
+            let val = if let Ok(u32) = kw.value.parse::<u32>() {
+                Literal::u32_suffixed(u32)
+            } else {
+                Literal::string(&kw.value)
+            };
 
-            quote!(#name: #value,)
+            quote!(#name: #val,)
         })
         .collect::<Vec<_>>();
 
@@ -77,18 +83,20 @@ pub fn org_mod(what: TS) -> TS {
     let kwstruct = ItemStruct {
         fields: Fields::Named(FieldsNamed {
             brace_token: Default::default(),
-            named: Punctuated::from_iter(keywords.into_iter().map(|kw| Field {
-                attrs: vec![],
-                colon_token: Some(Default::default()),
-                vis: syn::Visibility::Public(Default::default()),
-                ident: Some(Ident::new(&kw.key, Span::call_site())),
-                mutability: syn::FieldMutability::None,
-                ty: syn::Type::Reference(TypeReference {
-                    and_token: Default::default(),
-                    lifetime: Some(Lifetime::new("'static", Span::call_site())),
-                    elem: Box::new(Parser::parse2(syn::Type::parse, st.clone()).unwrap()),
-                    mutability: None,
-                }),
+            named: Punctuated::from_iter(keywords.into_iter().map(|kw| {
+                Field {
+                    attrs: vec![],
+                    colon_token: Some(Default::default()),
+                    vis: syn::Visibility::Public(Default::default()),
+                    ident: Some(Ident::new(&kw.key, Span::call_site())),
+                    mutability: syn::FieldMutability::None,
+                    ty: if kw.value.parse::<u32>().is_ok() {
+                        Parser::parse2(syn::Type::parse, u3)
+                    } else {
+                        Parser::parse2(syn::Type::parse, st)
+                    }
+                    .unwrap(),
+                }
             })),
         }),
         attrs: vec![],
@@ -116,6 +124,64 @@ pub fn org_mod(what: TS) -> TS {
                     dangerous_inner_html: HTML_DATA
                 }
             })
+        }
+    }
+    .into()
+}
+
+#[proc_macro]
+pub fn ranks(input: TS) -> TS {
+    let input = Parser::parse(Punctuated::<Ident, Token!(,)>::parse_terminated, input).unwrap();
+    let rks = input
+        .iter()
+        .map(|rank| Ident::new(&rank.to_string().to_pascal_case(), Span::call_site()));
+    let rkws = input
+        .iter()
+        .map(|rank| {
+            (
+                rank,
+                Ident::new(
+                    &(rank.to_string().to_uppercase() + "_KEYWORDS"),
+                    Span::call_site(),
+                ),
+            )
+        })
+        .map(|(rank, kws)| {
+            quote! {
+                static #kws: RankKeywords = RankKeywords {
+                    name: #rank::KEYWORDS.title,
+                    price: #rank::KEYWORDS.price
+                }
+            }
+        });
+    let rkws_match = input
+        .iter()
+        .map(|rank| {
+            (
+                Ident::new(&rank.to_string().to_pascal_case(), Span::call_site()),
+                Ident::new(
+                    &(rank.to_string().to_uppercase() + "_KEYWORDS"),
+                    Span::call_site(),
+                ),
+            )
+        })
+        .map(|(rank, kws)| quote!(Self::#rank => Self::#kws,));
+
+    quote! {
+        #[derive(Copy, Clone, Debug)]
+        pub enum Rank {
+            #(#rks)*
+        }
+
+        impl Rank {
+            #(#rkws)*
+
+            #[doc(hidden)]
+            pub fn _keywords(&self) -> &'static RankKeywords {
+                match {
+                    #(#rkws_match)*
+                }
+            }
         }
     }
     .into()
