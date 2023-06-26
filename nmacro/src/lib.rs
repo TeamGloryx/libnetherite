@@ -181,6 +181,16 @@ pub fn ranks(input: TS) -> TS {
         .map(|rank| Ident::new(&rank.to_string().to_pascal_case(), Span::call_site()))
         .map(|rank| quote!(Self::#rank));
 
+    let names = input
+        .iter()
+        .map(|rank| {
+            (
+                Literal::string(&rank.to_string()),
+                Ident::new(&rank.to_string().to_pascal_case(), Span::call_site()),
+            )
+        })
+        .map(|(rank, var)| quote!(Self::#var => #rank,));
+
     quote! {
         #[derive(Copy, Clone, Debug)]
         pub enum Rank {
@@ -195,6 +205,12 @@ pub fn ranks(input: TS) -> TS {
             pub fn render<'a>(&self, cx: dioxus::prelude::Scope<'a>) -> dioxus::prelude::Element<'a> {
                 match self {
                     #(#render_match)*
+                }
+            }
+
+            pub fn name(&self) -> &'static str {
+                match self {
+                    #(#names)*
                 }
             }
 
