@@ -210,7 +210,7 @@ pub fn ranks(input: TS) -> TS {
         .map(|(rank, var)| quote!(Self::#var => #rank::ORG_DATA));
 
     quote! {
-        #[derive(Copy, Clone, Debug)]
+        #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
         pub enum Rank {
             #(#rks,)*
         }
