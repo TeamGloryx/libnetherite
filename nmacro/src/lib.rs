@@ -190,6 +190,24 @@ pub fn ranks(input: TS) -> TS {
             )
         })
         .map(|(rank, var)| quote!(Self::#var => #rank));
+    let html_match = input
+        .iter()
+        .map(|rank| {
+            (
+                rank,
+                Ident::new(&rank.to_string().to_pascal_case(), Span::call_site()),
+            )
+        })
+        .map(|(rank, var)| quote!(Self::#var => #rank::HTML_DATA));
+    let org_match = input
+        .iter()
+        .map(|rank| {
+            (
+                rank,
+                Ident::new(&rank.to_string().to_pascal_case(), Span::call_site()),
+            )
+        })
+        .map(|(rank, var)| quote!(Self::#var => #rank::ORG_DATA));
 
     quote! {
         #[derive(Copy, Clone, Debug)]
@@ -218,6 +236,17 @@ pub fn ranks(input: TS) -> TS {
             pub fn _keywords(&self) -> &'static RankKeywords {
                 match self {
                     #(#rkws_match,)*
+                }
+            }
+
+            pub fn html(&self) -> &'static str {
+                match self {
+                    #(#html_match,)*
+                }
+            }
+            pub fn org(&self) -> &'static str {
+                match self {
+                    #(#org_match,)*
                 }
             }
         }
