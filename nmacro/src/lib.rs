@@ -150,7 +150,8 @@ pub fn ranks(input: TS) -> TS {
             quote! {
                 static #kws: RankKeywords = RankKeywords {
                     name: #rank::KEYWORDS.title,
-                    price: #rank::KEYWORDS.price
+                    price: #rank::KEYWORDS.price,
+                    description: #rank::KEYWORDS.description
                 };
             }
         });
