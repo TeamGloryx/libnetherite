@@ -165,7 +165,7 @@ pub fn ranks(input: TS) -> TS {
                 ),
             )
         })
-        .map(|(rank, kws)| quote!(Self::#rank => &#kws,));
+        .map(|(rank, kws)| quote!(Self::#rank => &#kws));
     let render_match = input
         .iter()
         .map(|rank| {
@@ -179,7 +179,7 @@ pub fn ranks(input: TS) -> TS {
     let values = input
         .iter()
         .map(|rank| Ident::new(&rank.to_string().to_pascal_case(), Span::call_site()))
-        .map(|rank| quote!(Self::#rank,));
+        .map(|rank| quote!(Self::#rank));
 
     let names = input
         .iter()
@@ -189,7 +189,7 @@ pub fn ranks(input: TS) -> TS {
                 Ident::new(&rank.to_string().to_pascal_case(), Span::call_site()),
             )
         })
-        .map(|(rank, var)| quote!(Self::#var => #rank,));
+        .map(|(rank, var)| quote!(Self::#var => #rank));
 
     quote! {
         #[derive(Copy, Clone, Debug)]
@@ -200,24 +200,24 @@ pub fn ranks(input: TS) -> TS {
         #(#rkws)*
 
         impl Rank {
-            pub const VALUES: [Self; #count] = [#(#values)*];
+            pub const VALUES: [Self; #count] = [#(#values,)*];
 
             pub fn render<'a>(&self, cx: dioxus::prelude::Scope<'a>) -> dioxus::prelude::Element<'a> {
                 match self {
-                    #(#render_match)*
+                    #(#render_match,)*
                 }
             }
 
             pub fn name(&self) -> &'static str {
                 match self {
-                    #(#names)*
+                    #(#names,)*
                 }
             }
 
             #[doc(hidden)]
             pub fn _keywords(&self) -> &'static RankKeywords {
                 match self {
-                    #(#rkws_match)*
+                    #(#rkws_match,)*
                 }
             }
         }
