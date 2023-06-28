@@ -7,8 +7,7 @@ use syn::{
     parse::{Parse, Parser},
     parse_macro_input,
     punctuated::Punctuated,
-    ExprStruct, Field, Fields, FieldsNamed, Generics, ItemStruct, Lifetime, LitStr, Path, Token,
-    TypePath, TypeReference,
+    Field, Fields, FieldsNamed, Generics, ItemStruct, LitStr, Token,
 };
 
 fn literate(num: f32) -> Literal {
@@ -151,7 +150,8 @@ pub fn ranks(input: TS) -> TS {
                 static #kws: RankKeywords = RankKeywords {
                     name: #rank::KEYWORDS.title,
                     price: #rank::KEYWORDS.price,
-                    description: #rank::KEYWORDS.description
+                    description: #rank::KEYWORDS.description,
+                    category: #rank::KEYWORDS.category
                 };
             }
         });
