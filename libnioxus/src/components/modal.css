@@ -1,0 +1,33 @@
+dialog.nioxus-dialog {
+  border-radius: 0.2em;
+  border: none;
+  padding: 0;
+}
+dialog.nioxus-dialog::backdrop {
+  background: rgb(0 0 0 / 0.3);
+}
+dialog.nioxus-dialog > div.nioxus-dialog-container {
+  padding: 1em;
+}
+dialog.nioxus-dialog[open] {
+  animation: nioxus-d-zoom 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes nioxus-d-zoom {
+  from {
+    transform: scale(0.95);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+dialog.nioxus-dialog[open]::backdrop {
+  animation: nioxus-d-fade 0.2s ease-out;
+}
+@keyframes nioxus-d-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
